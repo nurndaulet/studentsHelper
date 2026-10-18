@@ -7,7 +7,6 @@ import {
   Modal,
   Platform,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -16,6 +15,8 @@ import {
   View,
   KeyboardAvoidingView,
 } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { createStudentStorage } from "./src/storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   COLORS,
@@ -29,7 +30,7 @@ import {
   weekDay,
 } from "./src/model";
 
-const KEY = "@smart-student/v1";
+const studentStorage = createStudentStorage(AsyncStorage);
 const tabs = [
   ["home", "⌂", "Басты бет"],
   ["schedule", "▦", "Кесте"],
@@ -37,6 +38,13 @@ const tabs = [
   ["materials", "▤", "Материал"],
 ];
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <StudentApp />
+    </SafeAreaProvider>
+  );
+}
+function StudentApp() {
   const [data, setData] = useState(emptyData),
     [ready, setReady] = useState(false),
     [error, setError] = useState(""),
@@ -50,18 +58,10 @@ export default function App() {
     [group, setGroup] = useState(""),
     [tick, setTick] = useState(Date.now());
   useEffect(() => {
-    AsyncStorage.getItem(KEY)
-      .then((raw) => {
-        if (raw) {
-          const saved = JSON.parse(raw);
-          if (
-            !Array.isArray(saved.lessons) ||
-            !Array.isArray(saved.tasks) ||
-            !Array.isArray(saved.materials)
-          )
-            throw Error("storage");
-          setData(saved);
-        }
+    studentStorage
+      .load()
+      .then((saved) => {
+        if (saved) setData(saved);
       })
       .catch(() =>
         setError(
@@ -74,7 +74,7 @@ export default function App() {
   }, []);
   async function update(next) {
     try {
-      await AsyncStorage.setItem(KEY, JSON.stringify(next));
+      await studentStorage.save(next);
       setData(next);
       return true;
     } catch {
@@ -325,7 +325,11 @@ export default function App() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={s.brand}>
-            <Image source={require("./assets/icon.png")} style={s.logo} />
+            <Image
+              accessibilityLabel="Smart Student иконкасы"
+              source={require("./assets/icon.png")}
+              style={s.logo}
+            />
             <Text style={s.cardTitle}>Smart Student</Text>
           </View>
           <Text style={[s.title, { fontSize: 32, marginTop: 42 }]}>
@@ -407,8 +411,7 @@ export default function App() {
           {tab === "home" && (
             <>
               <Text style={s.eyebrow}>
-                {DAYS[today].toUpperCase()},{" "}
-                {displayDate(now)}
+                {DAYS[today].toUpperCase()}, {displayDate(now)}
               </Text>
               <View style={s.hero}>
                 <Text style={s.heroSmall}>
@@ -839,7 +842,6 @@ const s = StyleSheet.create({
   shell: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   app: { flex: 1, width: "100%", maxWidth: 720, alignSelf: "center" },
   content: {

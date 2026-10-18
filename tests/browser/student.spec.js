@@ -41,7 +41,21 @@ test("student can manage schedule, homework, materials and keep data after reloa
     .fill("SELECT — деректерді таңдау.");
   await page.getByRole("button", { name: "Сақтау", exact: true }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
-  await page.reload();
+  const context = page.context();
+  await page.close();
+  page = await context.newPage();
+  await page.goto("/");
+  await expect(
+    page.getByText("Айдана Қасымова", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Кесте", exact: false }).click();
+  await expect(page.getByText("Деректер қоры", { exact: true })).toBeVisible();
+  await page.getByRole("tab", { name: "Тапсырма", exact: false }).click();
+  await page.getByText("Орындалған", { exact: true }).click();
+  await expect(
+    page.getByRole("checkbox", { name: "SQL зертханасы" }),
+  ).toHaveAttribute("aria-checked", "true");
+
   await page.getByRole("tab", { name: "Материал", exact: false }).click();
   await expect(page.getByText("SQL конспект", { exact: true })).toBeVisible();
   await page.getByText("Өңдеу", { exact: true }).click();
