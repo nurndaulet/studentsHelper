@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Smart Student",
+    "slug": "smart-student",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F4F7FC"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "kz.studentshelper.smartstudent"
+    },
+    "android": {
+      "package": "kz.studentshelper.smartstudent",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2563EB"
+      }
+    },
+    "web": { "favicon": "./assets/icon.png" }
+  }
+}
